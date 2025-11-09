@@ -1,5 +1,10 @@
 FROM nginx:latest
 
+# Install git for runtime repo updates
+RUN apt-get update \
+    && apt-get install -y git \
+    && rm -rf /var/lib/apt/lists/*
+
 # Copy SSL certificates
 COPY ./ssl/cert.pem /etc/nginx/ssl/cert.pem
 COPY ./ssl/key.pem /etc/nginx/ssl/key.pem
