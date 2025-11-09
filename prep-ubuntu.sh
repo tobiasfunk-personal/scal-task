@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Ubuntu prep script: install Docker, Minikube, Certbot, and fetch TLS certs.
+# Ubuntu prep script: warn if Docker/Minikube missing, install Certbot, fetch TLS certs.
 #
 # Usage:
 #   CERTBOT_DOMAIN=example.com CERTBOT_EMAIL=admin@example.com ./prep-ubuntu.sh
@@ -19,50 +19,15 @@ fi
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 CERTS_DIR="$SCRIPT_DIR/certs"
 
-echo "[1/5] Updating apt index and installing prerequisites..."
-$SUDO apt-get update -y
-$SUDO apt-get install -y \
-  ca-certificates \
-  curl \
-  gnupg \
-  lsb-release \
-  apt-transport-https \
-  software-properties-common
-
-echo "[2/5] Installing Docker Engine..."
+echo "[1/3] Checking Docker and Minikube presence..."
 if ! command -v docker >/dev/null 2>&1; then
-  # Add Docker’s official GPG key
-  $SUDO install -m 0755 -d /etc/apt/keyrings
-  curl -fsSL https://download.docker.com/linux/ubuntu/gpg | $SUDO gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-  $SUDO chmod a+r /etc/apt/keyrings/docker.gpg
-
-  # Add the repository
-  echo \
-    "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-    $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
-    $SUDO tee /etc/apt/sources.list.d/docker.list >/dev/null
-
-  $SUDO apt-get update -y
-  $SUDO apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-  $SUDO systemctl enable --now docker
-  # Add current user to docker group (effective next login)
-  if getent group docker >/dev/null; then
-    $SUDO usermod -aG docker "${SUDO_USER:-$USER}"
-  fi
-else
-  echo "Docker already installed; skipping."
+  echo "Warning: Docker is not installed. Install Docker if you plan to run containers."
 fi
-
-echo "[3/5] Installing Minikube..."
 if ! command -v minikube >/dev/null 2>&1; then
-  curl -Lo /tmp/minikube-linux-amd64 https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
-  $SUDO install /tmp/minikube-linux-amd64 /usr/local/bin/minikube
-  rm -f /tmp/minikube-linux-amd64
-else
-  echo "Minikube already installed; skipping."
+  echo "Warning: Minikube is not installed. Install Minikube if you plan to use Kubernetes locally."
 fi
 
-echo "[4/5] Installing Certbot..."
+echo "[2/3] Installing Certbot if needed..."
 if ! command -v certbot >/dev/null 2>&1; then
   if command -v snap >/dev/null 2>&1; then
     $SUDO snap install core
@@ -71,13 +36,14 @@ if ! command -v certbot >/dev/null 2>&1; then
     $SUDO ln -sf /snap/bin/certbot /usr/bin/certbot
   else
     # Fallback to apt if snapd is unavailable
+    $SUDO apt-get update -y
     $SUDO apt-get install -y certbot
   fi
 else
   echo "Certbot already installed; skipping."
 fi
 
-echo "[5/5] Obtaining TLS certificate via Certbot standalone..."
+echo "[3/3] Obtaining TLS certificate via Certbot standalone..."
 DOMAIN=${CERTBOT_DOMAIN:-}
 EMAIL=${CERTBOT_EMAIL:-}
 if [[ -z "$DOMAIN" || -z "$EMAIL" ]]; then
