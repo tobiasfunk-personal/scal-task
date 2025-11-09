@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Ubuntu prep script: warn if Docker/Minikube missing, install Certbot, fetch TLS certs.
+# Ubuntu prep script (run as root): warn if Docker/Minikube missing, install Certbot, fetch TLS certs.
 #
 # Usage:
 #   CERTBOT_DOMAIN=example.com CERTBOT_EMAIL=admin@example.com ./prep-ubuntu.sh
@@ -9,12 +9,6 @@ set -euo pipefail
 # Notes:
 # - Certbot standalone needs ports 80 and 443 free on this machine.
 # - Certificates will be copied into ./certs/ (relative to this script).
-
-if [[ ${EUID:-$(id -u)} -ne 0 ]]; then
-  SUDO=sudo
-else
-  SUDO=
-fi
 
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 CERTS_DIR="$SCRIPT_DIR/certs"
@@ -30,14 +24,14 @@ fi
 echo "[2/3] Installing Certbot if needed..."
 if ! command -v certbot >/dev/null 2>&1; then
   if command -v snap >/dev/null 2>&1; then
-    $SUDO snap install core
-    $SUDO snap refresh core
-    $SUDO snap install --classic certbot
-    $SUDO ln -sf /snap/bin/certbot /usr/bin/certbot
+    snap install core
+    snap refresh core
+    snap install --classic certbot
+    ln -sf /snap/bin/certbot /usr/bin/certbot
   else
     # Fallback to apt if snapd is unavailable
-    $SUDO apt-get update -y
-    $SUDO apt-get install -y certbot
+    apt-get update -y
+    apt-get install -y certbot
   fi
 else
   echo "Certbot already installed; skipping."
@@ -59,7 +53,7 @@ if ss -tulpn 2>/dev/null | grep -E ':(80|443)\s' >/dev/null 2>&1; then
 fi
 
 set -x
-$SUDO certbot certonly --standalone -d "$DOMAIN" --agree-tos -m "$EMAIL" --non-interactive
+certbot certonly --standalone -d "$DOMAIN" --agree-tos -m "$EMAIL" --non-interactive
 set +x
 
 LIVE_DIR="/etc/letsencrypt/live/$DOMAIN"
