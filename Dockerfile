@@ -5,9 +5,8 @@ RUN apt-get update \
     && apt-get install -y git \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy SSL certificates
-COPY ./ssl/cert.pem /etc/nginx/ssl/cert.pem
-COPY ./ssl/key.pem /etc/nginx/ssl/key.pem
+# Copy SSL certificates (expects ./certs to contain fullchain.pem and privkey.pem)
+COPY ./certs /etc/nginx/certs
 
 # Copy custom nginx configuration
 COPY ./nginx.conf /etc/nginx/nginx.conf
