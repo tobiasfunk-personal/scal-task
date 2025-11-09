@@ -2,7 +2,7 @@ FROM nginx:latest
 
 # Install git for runtime repo updates
 RUN apt-get update \
-    && apt-get install -y git \
+    && apt-get install -y git iputils-ping dnsutils curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy SSL certificates (expects ./certs to contain fullchain.pem and privkey.pem)
