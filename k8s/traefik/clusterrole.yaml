@@ -4,7 +4,7 @@ metadata:
   name: traefik
 rules:
   - apiGroups: [""]
-    resources: ["services", "endpoints", "secrets", "configmaps"]
+    resources: ["services", "endpoints", "secrets", "configmaps", "nodes"]
     verbs: ["get", "list", "watch"]
   - apiGroups: ["discovery.k8s.io"]
     resources: ["endpointslices"]
