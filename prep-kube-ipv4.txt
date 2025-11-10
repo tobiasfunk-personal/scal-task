@@ -1,0 +1,25 @@
+# set alias
+alias kubectl="minikube kubectl --"
+
+# apply the confs
+kubectl apply -f k8s/traefik/namespace.yaml
+kubectl apply -f k8s/web/namespace.yaml
+kubectl apply -R -f k8s/
+
+# Switch Traefik service to NodePort:
+kubectl -n traefik patch svc traefik -p '{"spec":{"type":"NodePort"}}'
+
+# store ports in vars
+HTTP_PORT=$(kubectl -n traefik get svc traefik -o jsonpath='{.spec.ports[?(@.name=="web")].nodePort}')
+HTTPS_PORT=$(kubectl -n traefik get svc traefik -o jsonpath='{.spec.ports[?(@.name=="websecure")].nodePort}')
+NODE_IP=$(minikube ip)
+
+# forward in iptabkes
+iptables -t nat -A PREROUTING -p tcp --dport 80 -j DNAT --to-destination $NODE_IP:$HTTP_PORT
+iptables -t nat -A PREROUTING -p tcp --dport 443 -j DNAT --to-destination $NODE_IP:$HTTPS_PORT
+iptables -t nat -A POSTROUTING -p tcp -d $NODE_IP --dport $HTTP_PORT -j MASQUERADE
+iptables -t nat -A POSTROUTING -p tcp -d $NODE_IP --dport $HTTPS_PORT -j MASQUERADE
+
+kubectl -n web patch ingress web-http --type='json' -p='[{"op":"replace","path":"/spec/rules/0/host","value":"minikube.tofunk.net"}]'
+
+

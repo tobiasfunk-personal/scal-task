@@ -25,16 +25,9 @@ spec:
               containerPort: 8080
             - name: https
               containerPort: 8443
-          readinessProbe:
-            httpGet:
-              path: /
+          startupProbe:
+            tcpSocket:
               port: 8080
-            initialDelaySeconds: 5
-            periodSeconds: 10
-          livenessProbe:
-            httpGet:
-              path: /
-              port: 8080
-            initialDelaySeconds: 10
-            periodSeconds: 20
+            periodSeconds: 5
+            failureThreshold: 60
 
