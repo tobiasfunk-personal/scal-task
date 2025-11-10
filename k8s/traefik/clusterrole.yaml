@@ -12,6 +12,7 @@ rules:
   - apiGroups: ["networking.k8s.io"]
     resources: ["ingresses/status"]
     verbs: ["update"]
+  # Traefik v2 CRDs (legacy group)
   - apiGroups: ["traefik.containo.us"]
     resources:
       [
@@ -23,7 +24,23 @@ rules:
         "tlsoptions",
         "tlsstores",
         "traefikservices",
-        "serverstransports"
+        "serverstransports",
+        "serverstransporttcps"
       ]
     verbs: ["get", "list", "watch"]
-
+  # Traefik v3 CRDs (current group)
+  - apiGroups: ["traefik.io"]
+    resources:
+      [
+        "ingressroutes",
+        "ingressroutetcps",
+        "ingressrouteudps",
+        "middlewares",
+        "middlewaretcps",
+        "tlsoptions",
+        "tlsstores",
+        "traefikservices",
+        "serverstransports",
+        "serverstransporttcps"
+      ]
+    verbs: ["get", "list", "watch"]
