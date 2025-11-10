@@ -30,15 +30,12 @@ spec:
             - name: websecure
               containerPort: 443
           readinessProbe:
-            httpGet:
-              path: /ping
+            tcpSocket:  
               port: 80
             initialDelaySeconds: 2
             periodSeconds: 5
           livenessProbe:
-            httpGet:
-              path: /ping
+            tcpSocket:
               port: 80
             initialDelaySeconds: 5
             periodSeconds: 10
-
