@@ -1,0 +1,16 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRouteTCP
+metadata:
+  name: web-https-passthrough
+  namespace: web
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: HostSNI(`*`)
+      services:
+        - name: web
+          port: 8443
+  tls:
+    passthrough: true
+
