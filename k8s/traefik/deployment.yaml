@@ -16,7 +16,7 @@ spec:
       serviceAccountName: traefik
       containers:
         - name: traefik
-          image: traefik:v2.10
+          image: traefik:v3.5
           args:
             - --providers.kubernetesingress=true
             - --providers.kubernetescrd=true

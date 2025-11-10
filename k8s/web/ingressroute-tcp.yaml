@@ -7,7 +7,7 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: HostSNI(`*`)
+    - match: HostSNI(`minikube.tofunk.net`)
       services:
         - name: web
           port: 8443
