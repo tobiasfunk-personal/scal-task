@@ -13,13 +13,21 @@ kubectl -n traefik patch svc traefik -p '{"spec":{"type":"NodePort"}}'
 HTTP_PORT=$(kubectl -n traefik get svc traefik -o jsonpath='{.spec.ports[?(@.name=="web")].nodePort}')
 HTTPS_PORT=$(kubectl -n traefik get svc traefik -o jsonpath='{.spec.ports[?(@.name=="websecure")].nodePort}')
 NODE_IP=$(minikube ip)
+PUBLIC_IP='91.98.88.70'
+NODE_IP=$(minikube ip)
 
 # forward in iptabkes
-iptables -t nat -A PREROUTING -p tcp --dport 80 -j DNAT --to-destination $NODE_IP:$HTTP_PORT
-iptables -t nat -A PREROUTING -p tcp --dport 443 -j DNAT --to-destination $NODE_IP:$HTTPS_PORT
-iptables -t nat -A POSTROUTING -p tcp -d $NODE_IP --dport $HTTP_PORT -j MASQUERADE
+
+iptables -t nat -A PREROUTING -i "$EXT_IF" -p tcp -d "$PUBLIC_IP" --dport 80 -j DNAT --to-destination "$NODE_IP:$HTTP_PORT"
+iptables -t nat -A PREROUTING -i "$EXT_IF" -p tcp -d "$PUBLIC_IP" --dport 443 -j DNAT --to-destination "$NODE_IP:$HTTPS_PORT"
+
 iptables -t nat -A POSTROUTING -p tcp -d $NODE_IP --dport $HTTPS_PORT -j MASQUERADE
+iptables -t nat -A POSTROUTING -p tcp -d $NODE_IP --dport $HTTP_PORT -j MASQUERADE
 
-kubectl -n web patch ingress web-http --type='json' -p='[{"op":"replace","path":"/spec/rules/0/host","value":"minikube.tofunk.net"}]'
+iptables -t nat -A POSTROUTING -o br-686bb28858ee -p tcp -d 192.168.49.2 --dport 30222 -j MASQUERADE
+iptables -t nat -A POSTROUTING -o br-686bb28858ee -p tcp -d 192.168.49.2 --dport 31954 -j MASQUERADE
 
+# and yes we need to NAT it apparently
+
+#iptables -P FORWARD ACCEPT
 
