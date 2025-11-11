@@ -2,6 +2,12 @@
 
 This project is a small demo to run a containerized webservice in a Kubernetes cluster.
 
+## Links
+
+- Project logbook / build docs: https://comet-apricot-d06.notion.site/2a62a90baa928062af42ef93c72cc0f0?v=2a62a90baa9280fab380000c654d42c4&pvs=74
+- Live demo: https://minikube.tofunk.net/
+- Webroot source: https://github.com/tobiasfunk-personal/www
+
 ## Steps to Reproduce
 
 ### Requirements
