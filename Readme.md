@@ -27,18 +27,20 @@ Please set up these beforehand:
 2. Generate SSL certs:
 
    ```bash
-   certbot certonly --standalone -d "my.domain" --agree-tos -m "mail@tofunk.net" --non-interactive
-   mkdir -p certs/
-   # move the generated cert material into the ./certs/ folder
+   certbot certonly --standalone -d "my.domain" --agree-tos -m "mail@my.domain" --non-interactive
    ```
-
-3. Build the image:
+   2.1 move the generated cert material into the ./certs/ folder
+      ```bash
+      mkdir -p certs/
+      mv /etc/letsencrypt/.../* certs/
+      ```
+4. Build the image:
 
    ```bash
    docker build -t web:1.0 .
    ```
 
-4. Add image to minikube (Traefik will be pulled from a registry):
+5. Add image to minikube (Traefik will be pulled from a registry):
 
    ```bash
    minikube image load web:1.0
